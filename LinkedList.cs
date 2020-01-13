@@ -62,7 +62,6 @@ namespace CalculatorApp
 
         public void Insert(Object data, int position)
         {
-            Console.WriteLine($"{position} - I");
             Node toAdd = new Node { data = data };
 
             if (position == 0)
@@ -88,7 +87,6 @@ namespace CalculatorApp
 
         public void Delete(int position)
         {
-            //Console.WriteLine($"{position} - D");
             Node current = head;
             if (position == 0)
             {
