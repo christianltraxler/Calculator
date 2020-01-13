@@ -4,7 +4,7 @@ using System.Windows.Forms;
 namespace CalculatorApp
 {
     //Fix bracket functionality
-    //Add more buttons/operations (sin, cos, tan,
+    //Add more buttons/operations (sin, cos, tan + inverses)
     //Add decimal number functionality
 
     public class Program
@@ -132,11 +132,7 @@ namespace CalculatorApp
 
             if (unmatched != "" || numForward != numBackward)
                 return false;
-
-
-
-
-
+            
             return true;
         }
 
@@ -156,7 +152,8 @@ namespace CalculatorApp
 
         static void Brackets(LinkedList expressionList)
         {
-            int numBrackets = 0;
+            int numBrackets = 0, forwardPosition = 0, backwardPosition = 0;
+            bool done = false;
             Node current = expressionList.head;
             while (current != null)
             {
@@ -175,13 +172,16 @@ namespace CalculatorApp
                 if (current.data.ToString() == "(" && last.data.ToString() == ")")
                 {
                     expressionList.Delete(0);
-                    expressionList.Delete(expressionList.Length() - 2);
+                    expressionList.Delete(expressionList.Length() - 1);
+                    forwardPosition = 0;
+                    backwardPosition = expressionList.Length() - 1;
+                    done = true;
                 }
 
-                for (int i = 0; i < numBrackets; i++)
+                for (int i = 0; i < numBrackets && done == false; i++)
                 {
                     current = expressionList.head;
-                    int counter = 0, forwardPosition = 0, backwardPosition = 0;
+                    int counter = 0;
                     while (current != null)
                     {
                         if (current.data.ToString() == "(")
@@ -195,13 +195,12 @@ namespace CalculatorApp
                         counter++;
                         current = current.next;
                     }
-
-                    Search("^", expressionList, forwardPosition + 1, backwardPosition - 1);
-                    Search("/*x", expressionList, forwardPosition + 1, backwardPosition - 1);
-                    Search("+-", expressionList, forwardPosition + 1, backwardPosition - 1);
                     expressionList.Delete(forwardPosition);
-                    expressionList.Delete(forwardPosition + 2);
+                    expressionList.Delete(backwardPosition);
                 }
+                    Search("^", expressionList, forwardPosition, backwardPosition - 2);
+                    Search("/*x", expressionList, forwardPosition, backwardPosition - 2);
+                    Search("+-", expressionList, forwardPosition, backwardPosition - 2);
             }
         }
 
@@ -240,12 +239,6 @@ namespace CalculatorApp
             while (last.next == null)
             {
                 last = last.next;
-            }
-
-            if (first.data.ToString() == "(" && last.data.ToString() == ")")
-            {
-                expressionList.Delete(0);
-                expressionList.Delete(expressionList.Length() - 2);
             }
 
             while (current != null && counter < endPosition)
