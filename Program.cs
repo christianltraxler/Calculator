@@ -7,6 +7,7 @@ namespace CalculatorApp
     //Add trig function functionality
     //Add inverse functionality (trig/sqrt)
     //Add decimal number functionality
+    //Add recent answer functionality
 
     public class Program
     {
