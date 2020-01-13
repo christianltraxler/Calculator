@@ -4,7 +4,8 @@ using System.Windows.Forms;
 namespace CalculatorApp
 {
     //Fix bracket functionality
-    //Add more buttons/operations (sin, cos, tan + inverses)
+    //Add trig function functionality
+    //Add inverse functionality (trig/sqrt)
     //Add decimal number functionality
 
     public class Program
