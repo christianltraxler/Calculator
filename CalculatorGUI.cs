@@ -46,15 +46,15 @@ namespace CalculatorApp
             tableLayout.ColumnCount = 4;
             tableLayout.RowCount = 6;
 
-            Button[] numbers = InitializeNumberButtons();
-            Button[] emptyButtons = InitializeOperationButtons();
-            Button[] trigButtons = InitializeTrigButtons();
-            Button[] deleteButtons = InitializeOtherButtons();
+            InitializeNumberButtons(tableLayout);
+            InitializeOperationButtons(tableLayout);
+            InitializeTrigButtons(tableLayout);
+            InitializeOtherButtons(tableLayout);
 
             Controls.Add(tableLayout);
         }
 
-        public Button[] InitializeNumberButtons()
+        public Button[] InitializeNumberButtons(TableLayoutPanel tableLayout)
         {
             Button[] numberButtons = new Button[10];
 
@@ -63,7 +63,7 @@ namespace CalculatorApp
                 numberButtons[i] = new Button();
                 numberButtons[i].Size = new Size(91, 80);
                 numberButtons[i].Text = Convert.ToString(i);
-                numberButtons[i].Font = new Font(numbers[i].Font.FontFamily, 40);
+                numberButtons[i].Font = new Font(numberButtons[i].Font.FontFamily, 40);
                 numberButtons[i].Click += new EventHandler(ClickButton);
                 numberButtons[i].ForeColor = Color.Wheat;
                 numberButtons[i].BackColor = Color.Black;
@@ -80,7 +80,7 @@ namespace CalculatorApp
             return numberButtons;
         }
 
-        public Button[] InitializeOperationButtons()
+        public Button[] InitializeOperationButtons(TableLayoutPanel tableLayout)
         {
             Button[] operationButtons = new Button[8];
 
@@ -90,7 +90,7 @@ namespace CalculatorApp
                 operationButtons[i].Size = new Size(91, 80);
                 operationButtons[i].Text = "";
                 operationButtons[i].Font = new Font(operationButtons[i].Font.FontFamily, 40);
-                if (i != 13)
+                if (i != 7)
                     operationButtons[i].Click += new EventHandler(ClickButton);
                 operationButtons[i].ForeColor = Color.Wheat;
                 operationButtons[i].BackColor = Color.Black;
@@ -117,7 +117,7 @@ namespace CalculatorApp
             return operationButtons;
         }
         
-        public Button[] InitializeTrigButtons()
+        public Button[] InitializeTrigButtons(TableLayoutPanel tableLayout)
         {
             Button[] trigButtons = new Button[3];
             
@@ -129,7 +129,7 @@ namespace CalculatorApp
                 trigButtons[i].Font = new Font(trigButtons[i].Font.FontFamily, 20);
                 trigButtons[i].ForeColor = Color.Wheat;
                 trigButtons[i].BackColor = Color.Black;
-                operationButtons[i].Click += new EventHandler(ClickTrigButton);
+                trigButtons[i].Click += new EventHandler(ClickTrigButton);
             }
             
             trigButtons[0].Text = "SIN";
@@ -142,11 +142,11 @@ namespace CalculatorApp
              return trigButtons;
         }
         
-        public Button[] InitializeOtherButtons() 
+        public Button[] InitializeOtherButtons(TableLayoutPanel tableLayout) 
         {
             Button[] otherButtons = new Button[3];
             
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 3; i++)
             {
                 otherButtons[i] = new Button();
                 otherButtons[i].Size = new Size(91, 80);
@@ -156,7 +156,7 @@ namespace CalculatorApp
                 otherButtons[i].BackColor = Color.Black;
             }
             otherButtons[0].Text = "AC";
-            otherButtons[0].Font = new Font(deleteButtons[0].Font.FontFamily, 20);
+            otherButtons[0].Font = new Font(otherButtons[0].Font.FontFamily, 20);
             otherButtons[0].Click += new EventHandler(ClickClearButton);
             
             otherButtons[1].Text = "DEL";
@@ -176,18 +176,22 @@ namespace CalculatorApp
 
         public void ClickButton(Object sender, EventArgs e)
         {
+            if (textBox.Text == "Enter An Expression")
+                textBox.Text = "";
             textBox.Text += (sender as Button).Text;
         }
         
         public void ClickTrigButton(Object sender, EventArgs e)
         {
+            if (textBox.Text == "Enter An Expression")
+                textBox.Text = "";
             textBox.Text = (sender as Button).Text;
             textBox.Text += "(";
         }
 
         public void ClickEqualsButton(Object sender, EventArgs e)
         {
-            RunProgram(calculator);
+            Run(calculator);
         }
 
         public void ClickClearButton(Object sender, EventArgs e)

@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace CalculatorApp
 {
-    //Fix bracket functionality
+    //Fix bracket functionality 
     //Add trig function functionality
     //Add inverse functionality (trig/sqrt)
     //Add decimal number functionality
@@ -14,11 +14,11 @@ namespace CalculatorApp
         public static CalculatorForm calculator = new CalculatorForm();
 
         public static void Main()
-        {
+        { 
             Application.Run(calculator);
         }
 
-        public static void RunProgram(CalculatorForm calculator)
+        public static void Run(CalculatorForm calculator)
         {
             string expression = "";
             expression = calculator.textBox.Text;
@@ -26,7 +26,6 @@ namespace CalculatorApp
             bool solvable = CheckSolvable(expression);
             if (solvable == true)
             {
-
                 LinkedList expressionList = new LinkedList();
                 for (int i = 0; i < expression.Length; i++)
                     expressionList.AddLast(expression[i].ToString());
