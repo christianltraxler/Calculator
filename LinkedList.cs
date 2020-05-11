@@ -6,18 +6,17 @@ namespace CalculatorApp
     {
         public Node head;
 
-        public string Print()
+        public string Text()
         {
             Node current = head;
-            string print = "";
+            string text = "";
             while (current != null)
             {
-                print += current.data;
-                print += " ";
+                text += current.data;
+                text += " ";
                 current = current.next;
             }
-            Console.WriteLine(print);
-            return print;
+            return text;
         }
 
         public int Length()
@@ -119,7 +118,6 @@ namespace CalculatorApp
                 count++;
             }
             Insert(data, startPosition);
-            Console.WriteLine(Print());
         }
     }
 

@@ -20,62 +20,91 @@ namespace CalculatorApp
 
         public static void Run(CalculatorForm calculator)
         {
-            string expression = "";
-            expression = calculator.textBox.Text;
+            // Get the expression from the textbox
+            string expression = calculator.textBox.Text;
 
+            // Make sure that the expression is solvable
             bool solvable = CheckSolvable(expression);
+
+            // Solve the expression if it is solvable
             if (solvable == true)
             {
+                // Create a lLinkedList instance for the expression
                 LinkedList expressionList = new LinkedList();
+
+                // Add each character to the LinkedList
                 for (int i = 0; i < expression.Length; i++)
                     expressionList.AddLast(expression[i].ToString());
-
+                
+                // Initialize variables
                 string number = "";
                 int counter = 0, startPosition = 0, endPosition = 0, digits = 0;
 
+                // Get the LinkedList head
                 Node current = expressionList.head;
 
+                // Iterate through the LinkedList to insert numbers
                 while (current != null)
                 {
+                    // If it is a number
                     if ((current.data.ToString().ToCharArray()[0] > 47) && (current.data.ToString().ToCharArray()[0] < 59))
                     {
+                        // If a number has not been started
                         if (number == "")
                             startPosition = counter;
+
+                        // Add the data to number
                         number += current.data.ToString();
+
+                        // Increment the digits
                         digits++;
                     }
+                    // If it is not a number, must be operation
                     else if (number != "")
                     {
+                        // The end of the number should be the previous node
                         endPosition = counter - 1;
+
+                        // Replace the string with a number
                         if (digits == 1)
                             expressionList.Replace(Convert.ToDouble(number), startPosition, startPosition);
                         else
                             expressionList.Replace(Convert.ToDouble(number), startPosition, endPosition);
+
+                        // Reset number, digits, counter
                         number = "";
                         counter = counter - digits + 1;
                         digits = 0;
                     }
+                    // Increment counter, LinkedList node
                     counter++;
                     current = current.next;
                 }
 
+                // Convert any remaining digits
                 if (digits != 0)
                 {
+                    // 
                     endPosition = counter - 1;
                     expressionList.Replace(Convert.ToDouble(number), startPosition, endPosition);
                 }
 
-                Brackets(expressionList);
+                // Solve expressions within brackets
+                SolveBrackets(expressionList);
 
-                Search("^", expressionList);
-                Search("/*x", expressionList);
-                Search("+-", expressionList);
+                // Solve each type of operation in order of BEDMAS
+                SolveExpression(expressionList);
 
-                calculator.textBox.Text = expressionList.Print();
+                //Output the result to the textbox
+                calculator.textBox.Text = expressionList.Text();
             }
             else
+            {
+                // Expression is not solvable
                 calculator.textBox.Text = "ERROR";
-
+                Console.WriteLine("Expression Not Solvable");
+            }
+            Console.WriteLine(expression + " = " + calculator.textBox.Text);
         }
 
         static bool CheckSolvable(string expression)
@@ -137,8 +166,9 @@ namespace CalculatorApp
             return true;
         }
 
-        static double Operation(double x, char op, double y)
+        static double SolveOperation(double x, char op, double y)
         {
+            // Solve operation
             switch (op)
             {
                 case '+': return x + y;
@@ -147,175 +177,185 @@ namespace CalculatorApp
                 case 'x': return x * y;
                 case '/': return x / y;
                 case '^': return Math.Pow(x, y);
+                default: throw new Exception("Operation Not Found");
             }
-            return 0;
         }
 
-        static void Brackets(LinkedList expressionList)
+        static void SolveBrackets(LinkedList expressionList)
         {
+            // Initialize variables
             int numBrackets = 0, forwardPosition = 0, backwardPosition = 0;
             bool done = false;
+
+            // Get LinkedList head
             Node current = expressionList.head;
+
+            // Iterate through LinkedList for brackets
             while (current != null)
             {
+                // Find the number of pairs of brackets
                 if (current.data.ToString() == "(")
                     numBrackets++;
+
+                // Increment LinkedList node
                 current = current.next;
             }
+
+            // If there are brackets
             if (numBrackets != 0)
             {
-                current = expressionList.head;
-                Node last = expressionList.head;
-                while (last.next != null)
-                {
-                    last = last.next;
-                }
-                if (current.data.ToString() == "(" && last.data.ToString() == ")")
-                {
-                    expressionList.Delete(0);
-                    expressionList.Delete(expressionList.Length() - 1);
-                    forwardPosition = 0;
-                    backwardPosition = expressionList.Length() - 1;
-                    done = true;
-                }
+                // Check for surrounding brackets, remove them if necessary
+                bool removed = DeleteSurroundingBrackets(expressionList);
 
-                for (int i = 0; i < numBrackets && done == false; i++)
+                // For each pair for brackets, remove the bracket
+                for (int i = Convert.ToInt32(removed); i < numBrackets; i++)
                 {
+                    // Initialize variables
                     current = expressionList.head;
-                    int counter = 0;
-                    while (current != null)
+                    int position = 0;
+
+                    // Iterate through LinkedList, find last/innermost pair of brackets
+                    while (current != null && done == false)
                     {
+                        // If the current node is the forward bracket
                         if (current.data.ToString() == "(")
                         {
-                            forwardPosition = counter;
+                            // Set the forwardPosition to be the position of the current node
+                            forwardPosition = position;
                         }
+                        // If the current node is the backwards bracket
                         else if (current.data.ToString() == ")")
                         {
-                            backwardPosition = counter;
+                            // Set the backwardPosition to be the position of the current node
+                            backwardPosition = position;
+                            Console.WriteLine(forwardPosition + " " + backwardPosition);
+                            // Exit loop once bracket positions have been determined
+                            done = true;
                         }
-                        counter++;
-                        current = current.next;
+                            // Increment the counters for position/LinkedList node
+                            position++;
+                            current = current.next;
                     }
-                    expressionList.Delete(forwardPosition);
+
+                    // Once brackets are found, solve expression
+                    // Delete the brackets
                     expressionList.Delete(backwardPosition);
+                    expressionList.Delete(forwardPosition);
+
+                    // Solve expression inside the brackets
+                    SolvePartialExpression(expressionList, forwardPosition, backwardPosition - 2);
                 }
-                    Search("^", expressionList, forwardPosition, backwardPosition - 2);
-                    Search("/*x", expressionList, forwardPosition, backwardPosition - 2);
-                    Search("+-", expressionList, forwardPosition, backwardPosition - 2);
             }
         }
 
-        static void Search(string op, LinkedList expressionList)
+        static bool DeleteSurroundingBrackets(LinkedList expressionList)
         {
-            Node current = expressionList.head.next;
-            int numOperations = 0;
-
-            while (current != null)
-            {
-                for (int i = 0; i < op.Length; i++)
-                {
-                    if (Convert.ToString(current.data) == Convert.ToString(op[i]))
-                        numOperations++;
-                }
-                current = current.next;
-            }
-            for (int i = 0; i < numOperations; i++)
-                Solve(op, expressionList);
-        }
-
-        static void Search(string op, LinkedList expressionList, int startPosition, int endPosition)
-        {
-            Node current = expressionList.head.next;
-            int numOperations = 0;
-            int counter = 0;
-
-            while (counter < startPosition)
-            {
-                counter++;
-                current = current.next;
-            }
-
-            Node first = expressionList.head;
+            // Intialize node variables
+            Node current = expressionList.head;
             Node last = expressionList.head;
-            while (last.next == null)
+            bool removed = false;
+
+            // Find last LinkedList node
+            while (last.next != null)
             {
                 last = last.next;
             }
 
-            while (current != null && counter < endPosition)
+            // If the brackets
+            if (current.data.ToString() == "(" && last.data.ToString() == ")")
             {
-                for (int i = 0; i < op.Length; i++)
-                {
-                    if (Convert.ToString(current.data) == Convert.ToString(op[i]))
-                        numOperations++;
-                }
-                current = current.next;
-                counter++;
-            }
-            for (int i = 0; i < numOperations; i++)
-            {
-                Solve(op, expressionList, startPosition, endPosition);
+                // Delete the surrounding brackets
+                expressionList.Delete(0);
+                expressionList.Delete(expressionList.Length() - 1);
 
+                // Set removed to true
+                removed = true;
             }
+            
+            // Return removed
+            return(removed);
+
         }
 
-        static void Solve(string op, LinkedList expressionList)
+        static void SolveExpression(LinkedList expressionList)
         {
-            Node previous = expressionList.head;
-            int counter = 0;
-            Node current = expressionList.head.next;
+            // Intialize variables
+            string op = "^*x/+-";
             bool done = false;
-            while (current != null && done == false)
+
+            for (int i = 0; i < op.Length && done == false; i++)
             {
-                for (int i = 0; i < op.Length; i++)
+                Node current = expressionList.head.next;
+                Node previous = expressionList.head;
+                int position = 1;
+
+                // Cycle through the exoressionList
+                while (current != null && done == false)
                 {
                     if (Convert.ToString(current.data) == Convert.ToString(op[i]))
                     {
-                        //Console.WriteLine($"{previous.data} {current.next.data}");
-                        double number;
-                        number = Operation(Convert.ToDouble(previous.data), op[i], Convert.ToDouble(current.next.data));
-                        expressionList.Replace(number, counter, counter + 2);
-                        counter = counter + number.ToString().Length - 3;
+                        // Solve the expression based on the operation found
+                        double number = SolveOperation(Convert.ToDouble(previous.data), op[i], Convert.ToDouble(current.next.data));
+                        expressionList.Replace(number, position - 1, position + 1);
+                        position--;
+
+                        // Recursively try to solve the expression 
+                        SolveExpression(expressionList);
+
+                        // Stop cycling
                         done = true;
                     }
+                    // Increment cycle variables
+                    current = current.next;
+                    previous = previous.next;
+                    position++;
                 }
-                previous = previous.next;
-                current = current.next;
-                counter++;
             }
+
+
+            
         }
 
-        static void Solve(string op, LinkedList expressionList, int startPosition, int endPosition)
+        static void SolvePartialExpression(LinkedList expressionList, int startPosition, int endPosition)
         {
-            Node previous = expressionList.head;
-            int counter = 0;
-            Node current = expressionList.head.next;
+            Node startNode = expressionList.head.next;
+            Node beforeStartNode = expressionList.head;
+            int position = 1;
+            string op = "^*x/+-";
             bool done = false;
 
-            while (current != null && counter < startPosition)
+            while (startNode != null && position < startPosition)
             {
-                previous = previous.next;
-                current = current.next;
-                counter++;
+                startNode = startNode.next;
+                beforeStartNode = beforeStartNode.next;
+                position++;
             }
 
-            while (current != null && done == true)
+            if (position > startPosition)
+                startPosition = position;
+
+            for (int i = 0; i < op.Length && done == false; i++)
             {
-                for (int i = 0; i < op.Length; i++)
+                Node current = startNode, previous = beforeStartNode;
+                position = startPosition;
+
+                while (current != null && position < endPosition)
                 {
                     if (Convert.ToString(current.data) == Convert.ToString(op[i]))
                     {
-                        //Console.WriteLine($"{previous.data} {current.next.data}");
-                        double number;
-                        number = Operation(Convert.ToDouble(previous.data), op[i], Convert.ToDouble(current.next.data));
-                        expressionList.Replace(number, counter, counter + 2);
-                        counter = counter + number.ToString().Length - 3;
+                        double number = SolveOperation(Convert.ToDouble(previous.data), op[i], Convert.ToDouble(current.next.data));
+                        expressionList.Replace(number, position - 1, position + 1);
+                        position--;
+
+                        // Recursively try to solve the expression 
+                        SolvePartialExpression(expressionList, startPosition, endPosition - 2);
+
                         done = true;
                     }
+                    current = current.next;
+                    previous = previous.next;
+                    position++;
                 }
-                previous = previous.next;
-                current = current.next;
-                counter++;
             }
         }
     }

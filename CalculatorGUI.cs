@@ -185,7 +185,7 @@ namespace CalculatorApp
         {
             if (textBox.Text == "Enter An Expression")
                 textBox.Text = "";
-            textBox.Text = (sender as Button).Text;
+            textBox.Text += (sender as Button).Text;
             textBox.Text += "(";
         }
 
@@ -201,7 +201,10 @@ namespace CalculatorApp
         
         public void ClickDeleteButton(Object sender, EventArgs e)
         {
-            //Add delete functionality
+            if (textBox.Text != "")
+            {
+                textBox.Text = textBox.Text.Substring(0, textBox.Text.Length - 1);
+            }
         }
         
         public void ClickInverseButton(Object sender, EventArgs e)
